@@ -1,0 +1,24 @@
+name: Check
+
+on:
+ push:
+  branches:
+   - 'feature/*'
+   - 'bugfix/*'
+   - 'develop'
+
+jobs:
+ build:
+  name: Check
+  runs-on: ubuntu-latest
+  steps:
+   - name: Checkout
+     uses: actions/checkout@v2
+   - name: Use Node 12.x
+     uses: actions/setup-node@v1
+     with:
+      node-version: '12.x'
+   - name: Install dependencies
+     run: npm install
+   - name: Check
+     run: npm run precommit
