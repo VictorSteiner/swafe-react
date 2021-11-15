@@ -2,11 +2,9 @@ import { Grid, TextField, Button, Typography } from '@material-ui/core';
 import React, { useCallback, useState } from 'react';
 import { login } from '../../api/services/userService';
 import { Login } from '../../api/__generated__';
-import { useToken } from '../../hooks/useToken';
 import { useHistory } from 'react-router-dom';
 
 export const LoginForm: React.FC = () => {
-  const { setToken } = useToken();
   const history = useHistory();
 
   const [formValue, setFormValue] = useState<Login>({
@@ -21,10 +19,13 @@ export const LoginForm: React.FC = () => {
   const handleSubmit = useCallback(() => {
     login(formValue)
       .then((response) => {
-        setToken(response.data ?? null);
+        localStorage.setItem(
+          'token',
+          response.data.jwt ? response.data.jwt : '',
+        );
       })
       .then(handleLogin);
-  }, [formValue, handleLogin, setToken]);
+  }, [formValue, handleLogin]);
 
   const handleEmailChange = useCallback(
     (event: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {

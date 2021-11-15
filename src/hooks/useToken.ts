@@ -10,8 +10,8 @@ export type DecodedToken = {
 };
 
 export interface TokenContext {
-  token: Token | null;
-  setToken: Dispatch<SetStateAction<Token | null>>;
+  token: string | null;
+  setToken: Dispatch<SetStateAction<string | null>>;
 }
 
 export const tokenContext = createContext<TokenContext>({
@@ -22,7 +22,9 @@ export const tokenContext = createContext<TokenContext>({
 });
 
 export const useToken = (): TokenContext => {
-  const [token, setToken] = useState<Token | null>(null);
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem('token') as string,
+  );
 
   return { token, setToken };
 };

@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from 'react';
-import { Redirect, Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { DecodedToken, useToken } from '../hooks/useToken';
 import { AdmininistrationIndex } from './administration';
 import { LoginIndex } from './login';
@@ -9,14 +9,12 @@ export const Content: React.FC = () => {
   const { token } = useToken();
 
   const isLoggedIn = useMemo(() => {
-    const decoded: DecodedToken | null = token?.jwt
-      ? jwt_decode(token.jwt)
-      : null;
+    const decoded: DecodedToken | null = token ? jwt_decode(token) : null;
 
     return decoded?.exp
       ? Number.parseInt(decoded?.exp) * 1000 > Date.now()
       : false;
-  }, [token?.jwt]);
+  }, [token]);
 
   if (!isLoggedIn) {
     return (
@@ -29,6 +27,7 @@ export const Content: React.FC = () => {
 
   return (
     <Switch>
+      <Redirect from="login" to="/administration" />
       <Route path="/login" component={LoginIndex} />
       <Route path="/administration" component={AdmininistrationIndex} />
     </Switch>
