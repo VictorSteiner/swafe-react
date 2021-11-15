@@ -14,6 +14,7 @@
     "formik": "^2.2.9",
     "history": "^5.0.1",
     "immer": "^9.0.6",
+    "jwt-decode": "^3.1.2",
     "luxon": "^2.0.2",
     "notistack": "^1.0.10",
     "react": "^17.0.2",
@@ -26,12 +27,13 @@
     "yup": "^0.32.11"
   },
   "scripts": {
-    "start": "craco start",
-    "build": "craco build",
-    "build:dev": "dotenv -e .env.dev craco build && cp src/web.config build/",
-    "test": "craco test",
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "build:dev": "dotenv -e .env.dev react-scripts build && cp src/web.config build/",
+    "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "lint": "eslint --ext .ts,.tsx src/ --fix"
+    "lint": "eslint --ext .ts,.tsx src/ --fix",
+    "codegen": "openapi -i https://afe2021fitness.azurewebsites.net/swagger/v1/swagger.json -o src/api/__generated__ --exportCore false --exportServices false"
   },
   "eslintConfig": {
     "extends": [
@@ -68,6 +70,8 @@
     "eslint-plugin-import": "^2.23.4",
     "eslint-plugin-react": "^7.24.0",
     "eslint-plugin-react-hooks": "^4.2.0",
+    "openapi-typescript": "^4.4.0",
+    "openapi-typescript-codegen": "^0.12.1",
     "prettier": "^2.3.2"
   }
 }

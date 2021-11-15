@@ -1,26 +1,25 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
+import { tokenContext, useToken } from './hooks/useToken';
+import { Content } from './pages/Content';
+import { CssBaseline } from '@material-ui/core';
+import { userContext, useUser } from './hooks/useUser';
 
 const App: React.FC = () => {
-	return (
-		<div className="App">
-			<header className="App-header">
-				<img src={logo} className="App-logo" alt="logo" />
-				<p>
-					Edit <code>src/App.tsx</code> and save to reload.
-				</p>
-				<a
-					className="App-link"
-					href="https://reactjs.org"
-					target="_blank"
-					rel="noopener noreferrer"
-				>
-					Learn React
-				</a>
-			</header>
-		</div>
-	);
+  const tokenContextValue = useToken();
+  const userContextValue = useUser();
+
+  return (
+    <tokenContext.Provider value={tokenContextValue}>
+      <userContext.Provider value={userContextValue}>
+        <Router>
+          <CssBaseline />
+          <Content />
+        </Router>
+      </userContext.Provider>
+    </tokenContext.Provider>
+  );
 };
 
 export default App;
