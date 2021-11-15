@@ -1,10 +1,24 @@
-import { Button } from '@material-ui/core';
-import React, { useCallback } from 'react';
+import React from 'react';
+import { AccountType } from '../../api/types';
+import { useUser } from '../../hooks/useUser';
+import { CustomerIndex } from './customer';
+import { ManagerIndex } from './manager';
+import { PersonalTrainerIndex } from './trainer';
 
 export const AdmininistrationIndex: React.FC = () => {
-  const logout = useCallback(() => {
-    localStorage.removeItem('token');
-  }, []);
+  const { user } = useUser();
 
-  return <Button onClick={logout}>Log me out!</Button>;
+  if (!user) {
+    return <>Something went wront, user not found!</>;
+  }
+
+  return (
+    <>
+      {(user?.accountType as AccountType) === 'Manager' && <ManagerIndex />}
+      {(user?.accountType as AccountType) === 'Client' && <CustomerIndex />}
+      {(user?.accountType as AccountType) === 'PersonalTrainer' && (
+        <PersonalTrainerIndex />
+      )}
+    </>
+  );
 };

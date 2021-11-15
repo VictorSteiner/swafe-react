@@ -1,5 +1,5 @@
 import React from 'react';
 
-export const AdministrationIndex: React.FC = () => {
+export const PersonalTrainerIndex: React.FC = () => {
   return <></>;
 };

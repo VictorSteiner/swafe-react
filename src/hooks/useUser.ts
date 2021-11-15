@@ -1,4 +1,11 @@
-import { createContext, Dispatch, SetStateAction, useState } from 'react';
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useEffect,
+  useState,
+} from 'react';
+import { currentUser } from '../api/services/userService';
 import { User } from '../api/__generated__';
 
 export interface UserContext {
@@ -15,6 +22,12 @@ export const userContext = createContext<UserContext>({
 
 export const useUser = (): UserContext => {
   const [user, setUser] = useState<User | null>(null);
+
+  useEffect(() => {
+    if (!user) {
+      currentUser().then((value) => setUser(value.data));
+    }
+  });
 
   return { user, setUser };
 };

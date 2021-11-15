@@ -1,5 +1,11 @@
-import { createContext, Dispatch, SetStateAction, useState } from 'react';
-import { Token } from '../api/__generated__';
+import {
+  createContext,
+  Dispatch,
+  SetStateAction,
+  useCallback,
+  useEffect,
+  useState,
+} from 'react';
 
 export type DecodedToken = {
   Name: string;
@@ -22,9 +28,20 @@ export const tokenContext = createContext<TokenContext>({
 });
 
 export const useToken = (): TokenContext => {
-  const [token, setToken] = useState<string | null>(
-    localStorage.getItem('token') as string,
-  );
+  const [token, setToken] = useState<string | null>(null);
+
+  const handleEvent = useCallback(() => {
+    const storedToken = localStorage.getItem('token') || null;
+    setToken(storedToken);
+  }, [setToken]);
+
+  useEffect(() => {
+    window.addEventListener('storage', handleEvent);
+
+    return () => {
+      window.removeEventListener('storage', handleEvent);
+    };
+  }, [handleEvent]);
 
   return { token, setToken };
 };

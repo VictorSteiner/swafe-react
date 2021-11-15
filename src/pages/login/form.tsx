@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable react/jsx-no-bind */
 import {
   Grid,
   TextField,
@@ -29,14 +31,7 @@ export const LoginForm: React.FC = () => {
 
   const handleSubmit = useCallback(
     (request: Login, _) => {
-      login(request)
-        .then((response) => {
-          localStorage.setItem(
-            'token',
-            response.data.jwt ? response.data.jwt : '',
-          );
-        })
-        .then(handleLogin);
+      login(request).then(handleLogin);
     },
     [handleLogin],
   );
@@ -74,6 +69,11 @@ export const LoginForm: React.FC = () => {
                 value={props.values.email}
                 type="email"
                 placeholder="Email"
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    props.submitForm();
+                  }
+                }}
                 onChange={props.handleChange}
               />
             </Grid>
@@ -86,6 +86,11 @@ export const LoginForm: React.FC = () => {
                 value={props.values.password}
                 type="password"
                 placeholder="Password"
+                onKeyPress={(event) => {
+                  if (event.key === 'Enter') {
+                    props.submitForm();
+                  }
+                }}
                 onChange={props.handleChange}
               />
             </Grid>
