@@ -2,14 +2,21 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 import React, { useMemo } from 'react';
-import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
-import { DecodedToken, useToken } from '../hooks/useToken';
+import {
+  Route,
+  Routes,
+  useNavigate,
+  useLocation,
+  Navigate,
+} from 'react-router-dom';
+import { useToken } from '../hooks/useToken';
 import { AdmininistrationIndex } from './administration';
 import { LoginIndex } from './login';
-import jwt_decode from 'jwt-decode';
 import { SideNavigation } from '../components/navigation/side-navigation';
 import Account from '@material-ui/icons/SupervisorAccount';
 import Logout from '@material-ui/icons/ExitToApp';
+import Workout from '@material-ui/icons/FitnessCenter';
+import Program from '@material-ui/icons/Assignment';
 import {
   Grid,
   ListItem,
@@ -18,11 +25,36 @@ import {
   makeStyles,
   Typography,
 } from '@material-ui/core';
-import { logout } from '../api/services/userService';
+import { WorkoutsIndex } from './workouts';
+import { ProgramsIndex } from './programs';
+import { useUser } from '../hooks/useUser';
+import { SettingsIndex } from './settings';
+import { Settings } from '@material-ui/icons';
 
 const useStyles = makeStyles((theme) => ({
   root: {
+    display: 'flex',
+    background: '#FFFFFF',
     height: '100%',
+    width: '100%',
+  },
+  content: {
+    display: 'flex',
+    flex: 1,
+    padding: theme.spacing(0),
+    flexDirection: 'column',
+    background: '#F7F7F7',
+    overflowY: 'hidden',
+    height: '100vh',
+  },
+  toolbar: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+    padding: theme.spacing(0, 2),
+    background: '#FFFFFF',
+    ...theme.mixins.toolbar,
+    borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
   },
   link: {
     background: `linear-gradient(-45deg, ${theme.palette.primary.light}, #FFFFFF)`,
@@ -49,24 +81,24 @@ interface LinkListProps {
 }
 
 export const Content: React.FC = () => {
-  const { token } = useToken();
+  const { decoded, setToken } = useToken();
+  const { user } = useUser();
   const classes = useStyles();
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const isLoggedIn = useMemo(() => {
-    const decoded: DecodedToken | null = token ? jwt_decode(token) : null;
-
-    return decoded?.exp
-      ? Number.parseInt(decoded?.exp) * 1000 > Date.now()
-      : false;
-  }, [token]);
+  const isLoggedIn = useMemo(
+    () =>
+      decoded?.exp ? Number.parseInt(decoded?.exp) * 1000 > Date.now() : false,
+    [decoded?.exp],
+  );
 
   if (!isLoggedIn) {
     return (
-      <Switch>
-        <Route path="/login" component={LoginIndex} />
-        <Redirect to="/login" />
-      </Switch>
+      <Routes>
+        <Route path="/login" element={<LoginIndex />} />
+        <Route path="*" element={<Navigate replace to="/login" />} />
+      </Routes>
     );
   }
 
@@ -74,25 +106,38 @@ export const Content: React.FC = () => {
     {
       icon: <Account />,
       label: 'Account',
-      to: '/administration',
+      to: '/account',
+    },
+    {
+      icon: <Workout />,
+      label: 'Workouts',
+      to: '/workouts',
+    },
+    {
+      icon: <Program />,
+      label: 'Programs',
+      to: '/programs',
+    },
+    {
+      icon: <Settings />,
+      label: 'Settings',
+      to: '/settings',
     },
   ];
 
   return (
-    <>
+    <div className={classes.root}>
       <SideNavigation>
         <Grid container justifyContent="space-between" className={classes.root}>
           <Grid item xs>
             {links.map((link) => (
               <ListItem
                 // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => history.replace(link.to)}
+                onClick={() => navigate(link.to)}
                 button
                 key={link.label}
                 className={
-                  link.to === history.location.pathname
-                    ? classes.link
-                    : undefined
+                  link.to === location.pathname ? classes.link : undefined
                 }
               >
                 <ListItemIcon style={{ marginLeft: 4 }}>
@@ -105,8 +150,14 @@ export const Content: React.FC = () => {
             ))}
           </Grid>
           <Grid item xs>
-            <ListItem button onClick={logout}>
-              <ListItemIcon>
+            <ListItem
+              button
+              onClick={() => {
+                localStorage.removeItem('token');
+                setToken(null);
+              }}
+            >
+              <ListItemIcon style={{ marginLeft: 4 }}>
                 <Logout />
               </ListItemIcon>
               <ListItemText>
@@ -116,12 +167,17 @@ export const Content: React.FC = () => {
           </Grid>
         </Grid>
       </SideNavigation>
-      <Switch>
-        <Redirect from="/login" to="/administration" />
-        <Redirect exact from="/" to="/administration" />
-        <Route path="/login" component={LoginIndex} />
-        <Route path="/administration" component={AdmininistrationIndex} />
-      </Switch>
-    </>
+      <main className={classes.content}>
+        <main style={{ flex: 1, height: '100%', overflowX: 'hidden' }}>
+          <Routes>
+            <Route path="/account" element={<AdmininistrationIndex />} />
+            <Route path="/workouts" element={<WorkoutsIndex />} />
+            <Route path="/programs" element={<ProgramsIndex />} />
+            <Route path="/settings" element={<SettingsIndex />} />
+            <Route path="*" element={<Navigate replace to="/account" />} />
+          </Routes>
+        </main>
+      </main>
+    </div>
   );
 };
