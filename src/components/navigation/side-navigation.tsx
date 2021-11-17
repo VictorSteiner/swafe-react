@@ -19,21 +19,27 @@ const useStyles = makeStyles<Theme>((theme) => ({
     flexShrink: 0,
     whiteSpace: 'nowrap',
     height: '100vh',
+    backgroundColor: theme.palette.primary.main,
   },
   drawerOpen: {
     width: drawerWidth,
+    backgroundColor: theme.palette.primary.main,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
     }),
   },
   drawerClosed: {
+    backgroundColor: theme.palette.primary.main,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
     }),
     overflowX: 'hidden',
     width: theme.spacing(8),
+  },
+  chevron: {
+    color: '#FFFFFF',
   },
 }));
 
@@ -73,7 +79,11 @@ export const SideNavigation: React.FC<ISideNavigationProps> = ({
     >
       <DrawerToolbar>
         <IconButton onClick={toggleDrawer}>
-          {isOpen ? <ChevronLeft /> : <ChevronRight />}
+          {isOpen ? (
+            <ChevronLeft className={classes.chevron} />
+          ) : (
+            <ChevronRight className={classes.chevron} />
+          )}
         </IconButton>
       </DrawerToolbar>
       {children}

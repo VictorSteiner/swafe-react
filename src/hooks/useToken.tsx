@@ -22,15 +22,10 @@ const TokenContext = createContext({
   decoded: {} as DecodedToken | null,
 });
 
-type ProviderProps = {
-  initialValue?: string;
-};
-
-export const TokenContextProvider: React.FC<ProviderProps> = ({
-  children,
-  initialValue,
-}) => {
-  const [token, setToken] = useState<string | null>(initialValue ?? null);
+export const TokenContextProvider: React.FC = ({ children }) => {
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem('token') ?? null,
+  );
   const [decoded, setDecoded] = useState<DecodedToken | null>(null);
 
   useEffect(() => {

@@ -3,13 +3,13 @@ import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
 import { TokenContextProvider } from './hooks/useToken';
 import { Content } from './pages/content';
-import { CssBaseline, ThemeProvider } from '@material-ui/core';
-import { theme } from './theme';
+import { CssBaseline } from '@material-ui/core';
 import { UserContextProvider } from './hooks/useUser';
+import { ThemeContextProvider } from './hooks/useTheme';
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeContextProvider>
       <TokenContextProvider>
         <UserContextProvider>
           <Router>
@@ -18,7 +18,7 @@ const App: React.FC = () => {
           </Router>
         </UserContextProvider>
       </TokenContextProvider>
-    </ThemeProvider>
+    </ThemeContextProvider>
   );
 };
 

@@ -1,5 +1,5 @@
 import React from 'react';
 
-export const CustomerIndex: React.FC = () => {
+export const CustomerPage: React.FC = () => {
   return <></>;
 };
