@@ -1,5 +1,5 @@
 import React from 'react';
 
 export const SettingsIndex: React.FC = () => {
-  return <>Hello from settings</>;
+  return <>Hello from settingssss</>;
 };
