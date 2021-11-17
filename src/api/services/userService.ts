@@ -1,26 +1,13 @@
 import { Login, NewPassword, Token, User } from '../__generated__';
 import axios from 'axios';
+import { UserCreateDTO } from '../types';
 
 const endpoint = `${process.env.REACT_APP_API_URL}/Users`;
 const token = localStorage.getItem('token') || null;
 const authorization = { Authorization: `Bearer ${token}` };
 
 export function login(request: Login) {
-  return axios.post<Token>(`${endpoint}/login`, request).then((response) => {
-    const jwtToken = response.data.jwt ?? null;
-
-    if (jwtToken) {
-      var x = window.open('', 'externalLogin', '');
-      x?.localStorage.setItem('token', jwtToken);
-      x?.close();
-    }
-  });
-}
-
-export function logout() {
-  var x = window.open('', 'externalLogout', '');
-  x?.localStorage.clear();
-  x?.close();
+  return axios.post<Token>(`${endpoint}/login`, request);
 }
 
 export function changePassword(request: NewPassword) {
@@ -29,13 +16,36 @@ export function changePassword(request: NewPassword) {
   });
 }
 
-export function users() {
+export function getUsers() {
   return axios.get<User[]>(endpoint, { headers: authorization });
 }
 
-export function currentUser() {
-  const userId = localStorage.getItem('userId');
-  return axios.get<User>(`${endpoint}/${userId ?? '1'}`, {
+export function createUser(request: UserCreateDTO) {
+  return axios.post<User>(endpoint, request, { headers: authorization });
+}
+
+export function getClients() {
+  return axios.get<User[]>(`${endpoint}/clients`, { headers: authorization });
+}
+
+export function getTrainer() {
+  return axios.get<User>(`${endpoint}/trainer`, { headers: authorization });
+}
+
+export function getUser(id: string) {
+  return axios.get<User>(`${endpoint}/${id}`, {
+    headers: authorization,
+  });
+}
+
+export function updateUser(request: User) {
+  return axios.put(`${endpoint}/${request.userId}`, request, {
+    headers: authorization,
+  });
+}
+
+export function deleteUser(id: string) {
+  return axios.delete(`${endpoint}/${id}`, {
     headers: authorization,
   });
 }

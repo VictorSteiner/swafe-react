@@ -1,5 +1,5 @@
 import React from 'react';
 
 export const ManagerIndex: React.FC = () => {
-  return <></>;
+  return <>Hello from manager index</>;
 };

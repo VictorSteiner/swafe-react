@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable react/jsx-no-bind */
 import {
   Grid,
@@ -11,9 +10,10 @@ import {
 import React, { useCallback, useMemo } from 'react';
 import { login } from '../../api/services/userService';
 import { Login } from '../../api/__generated__';
-import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 import { Formik } from 'formik';
+import { useToken } from '../../hooks/useToken';
+import { useNavigate } from 'react-router-dom';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,18 +22,26 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const LoginForm: React.FC = () => {
-  const history = useHistory();
+  const navigate = useNavigate();
+  const { setToken } = useToken();
   const classes = useStyles();
 
-  const handleLogin = useCallback(() => {
-    history.push('/administration');
-  }, [history]);
+  const handleNavigation = useCallback(() => {
+    navigate('/administration');
+  }, [navigate]);
 
   const handleSubmit = useCallback(
     (request: Login, _) => {
-      login(request).then(handleLogin);
+      login(request)
+        .then((response) => {
+          if (response.data.jwt) {
+            localStorage.setItem('token', response.data.jwt);
+            setToken(response.data.jwt);
+          }
+        })
+        .then(handleNavigation);
     },
-    [handleLogin],
+    [handleNavigation, setToken],
   );
 
   const validationSchema = useMemo(
