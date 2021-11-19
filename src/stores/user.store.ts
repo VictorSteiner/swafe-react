@@ -133,7 +133,7 @@ export const user: UserModel = {
       try {
         await service.create(payload);
         action.setCreateInput(undefined);
-        // action.fetchAll();
+        action.fetchAll();
       } catch (error) {
         throw error;
       }
@@ -144,17 +144,17 @@ export const user: UserModel = {
       try {
         await service.update(payload);
         action.setUpdateInput(undefined);
-        // action.fetchAll();
+        action.fetchAll();
       } catch (error) {
         throw error;
       }
     },
   ),
   delete: thunk(
-    async (_, payload, { injections: { userService: service } }) => {
+    async (action, payload, { injections: { userService: service } }) => {
       try {
         await service.delete(payload);
-        // action.fetchAll();
+        action.fetchAll();
       } catch (error) {
         throw error;
       }

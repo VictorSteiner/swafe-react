@@ -1,40 +1,15 @@
-/* eslint-disable max-lines */
-/* eslint-disable react/jsx-no-bind */
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
-/* eslint-disable @typescript-eslint/no-unsafe-return */
-import React, { useEffect, useMemo } from 'react';
-import {
-  Route,
-  Routes,
-  useNavigate,
-  useLocation,
-  Navigate,
-} from 'react-router-dom';
+import React from 'react';
+import { Route, Routes, Navigate } from 'react-router-dom';
 import { LoginIndex } from './login';
-import { SideNavigation } from '../components/navigation/side-navigation';
-import Account from '@material-ui/icons/SupervisorAccount';
-import Logout from '@material-ui/icons/ExitToApp';
-import Workout from '@material-ui/icons/FitnessCenter';
-import Program from '@material-ui/icons/Assignment';
-import Settings from '@material-ui/icons/Settings';
-import DarkMode from '@material-ui/icons/Brightness2';
-import LightMode from '@material-ui/icons/Brightness5';
-import {
-  Grid,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-  makeStyles,
-  Typography,
-} from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import { WorkoutsIndex } from './workouts';
 import { ProgramsIndex } from './programs';
 import { SettingsIndex } from './settings';
 import { PersonalTrainerPage } from './trainer';
 import { ManagerPage } from './manager';
 import { CustomerPage } from './customer';
-import { useTheme } from '../hooks/useTheme';
-import { useStoreActions, useStoreState } from '../hooks/useStore';
+import { useStoreState } from '../hooks/useStore';
+import { DefaultSideNavigation } from '../components/navigation/defaultSideNavigation';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -52,51 +27,12 @@ const useStyles = makeStyles((theme) => ({
     overflowY: 'hidden',
     height: '100vh',
   },
-  icon: {
-    color: theme.typography.h6.color,
-    textShadow: '0px 1px 0.5px rgba(255,255,255,0.3)',
-  },
-  link: {
-    background: `linear-gradient(-45deg, ${theme.palette.primary.light}, ${theme.palette.secondary.contrastText})`,
-    animation: `$gradient 4000ms ${theme.transitions.easing.easeInOut} infinite`,
-    backgroundSize: '200% 200%',
-  },
-  '@keyframes gradient': {
-    '0%': {
-      backgroundPosition: '0% 50%',
-    },
-    '50%': {
-      backgroundPosition: '100% 50%',
-    },
-    '100%': {
-      backgroundPosition: '0% 50%',
-    },
-  },
 }));
 
-interface LinkListProps {
-  label: string;
-  to: string;
-  icon: React.ReactNode;
-}
-
 export const Content: React.FC = () => {
-  const { decodedToken, loggedInUser } = useStoreState((state) => state.user);
-  const { logout } = useStoreActions((action) => action.user);
-  const { mode, setMode } = useTheme();
+  const isLoggedIn = useStoreState((state) => state.user.isLoggedIn);
+  const loggedInUser = useStoreState((state) => state.user.loggedInUser);
   const classes = useStyles();
-  const navigate = useNavigate();
-  const location = useLocation();
-
-  useEffect(() => console.log(decodedToken), [decodedToken]);
-
-  const isLoggedIn = useMemo(
-    () =>
-      decodedToken?.exp
-        ? Number.parseInt(decodedToken?.exp) * 1000 > Date.now()
-        : false,
-    [decodedToken?.exp],
-  );
 
   if (!isLoggedIn) {
     return (
@@ -106,29 +42,6 @@ export const Content: React.FC = () => {
       </Routes>
     );
   }
-
-  const links: LinkListProps[] = [
-    {
-      icon: <Account className={classes.icon} />,
-      label: 'Account',
-      to: '/account',
-    },
-    {
-      icon: <Workout className={classes.icon} />,
-      label: 'Workouts',
-      to: '/workouts',
-    },
-    {
-      icon: <Program className={classes.icon} />,
-      label: 'Programs',
-      to: '/programs',
-    },
-    {
-      icon: <Settings className={classes.icon} />,
-      label: 'Settings',
-      to: '/settings',
-    },
-  ];
 
   const AccountType = (): JSX.Element => {
     switch (loggedInUser?.accountType ?? '') {
@@ -145,66 +58,7 @@ export const Content: React.FC = () => {
 
   return (
     <div className={classes.root}>
-      <SideNavigation>
-        <Grid
-          container
-          className={classes.root}
-          direction="column"
-          justifyContent="space-between"
-        >
-          <Grid item>
-            {links.map((link) => (
-              <ListItem
-                // eslint-disable-next-line react/jsx-no-bind
-                onClick={() => navigate(link.to)}
-                button
-                key={link.label}
-                className={
-                  link.to === location.pathname ? classes.link : undefined
-                }
-              >
-                <ListItemIcon style={{ marginLeft: 4 }}>
-                  {link.icon}
-                </ListItemIcon>
-                <ListItemText>
-                  <Typography variant="h6" className={classes.icon}>
-                    {link.label}
-                  </Typography>
-                </ListItemText>
-              </ListItem>
-            ))}
-          </Grid>
-          <Grid item>
-            <ListItem button onClick={logout()}>
-              <ListItemIcon style={{ marginLeft: 4 }}>
-                <Logout className={classes.icon} />
-              </ListItemIcon>
-              <ListItemText>
-                <Typography variant="h6" className={classes.icon}>
-                  Logout
-                </Typography>
-              </ListItemText>
-            </ListItem>
-            <ListItem
-              button
-              onClick={() => setMode(mode === 'dark' ? 'light' : 'dark')}
-            >
-              <ListItemIcon style={{ marginLeft: 4 }}>
-                {mode === 'light' ? (
-                  <DarkMode className={classes.icon} />
-                ) : (
-                  <LightMode className={classes.icon} />
-                )}
-              </ListItemIcon>
-              <ListItemText>
-                <Typography variant="h6" className={classes.icon}>
-                  {mode === 'light' ? 'Lightmode' : 'Darkmode'}
-                </Typography>
-              </ListItemText>
-            </ListItem>
-          </Grid>
-        </Grid>
-      </SideNavigation>
+      <DefaultSideNavigation />
       <main className={classes.content}>
         <main style={{ flex: 1, height: '100%', overflowX: 'hidden' }}>
           <Routes>
@@ -212,7 +66,6 @@ export const Content: React.FC = () => {
             <Route path="/workouts/*" element={<WorkoutsIndex />} />
             <Route path="/programs/*" element={<ProgramsIndex />} />
             <Route path="/settings/*" element={<SettingsIndex />} />
-            <Route path="/login" element={<Navigate replace to="/account" />} />
             <Route path="*" element={<Navigate replace to="/account" />} />
           </Routes>
         </main>
