@@ -1,7 +1,7 @@
 /* eslint-disable react/jsx-no-bind */
 // import { makeStyles } from '@material-ui/core/styles';
 import React from 'react';
-import { useUser } from '../../hooks/useUser';
+import { useStoreState } from '../../hooks/useStore';
 
 // const useStyles = makeStyles((theme) => ({
 //   toolbar: {
@@ -10,7 +10,6 @@ import { useUser } from '../../hooks/useUser';
 // }));
 
 export const ManagerPage: React.FC = () => {
-  const { user } = useUser();
-
-  return <>{user?.accountType}</>;
+  const { loggedInUser } = useStoreState((state) => state.user);
+  return <>{loggedInUser?.accountType}</>;
 };

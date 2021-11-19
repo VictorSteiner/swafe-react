@@ -6,14 +6,13 @@ import {
   Typography,
   Paper,
   makeStyles,
+  CircularProgress,
 } from '@material-ui/core';
-import React, { useCallback, useMemo } from 'react';
-import { login } from '../../api/services/userService';
+import React, { useMemo } from 'react';
 import { Login } from '../../api/__generated__';
 import * as yup from 'yup';
 import { Formik } from 'formik';
-import { useToken } from '../../hooks/useToken';
-import { useNavigate } from 'react-router-dom';
+import { useStoreActions, useStoreState } from '../../hooks/useStore';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -22,27 +21,9 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 export const LoginForm: React.FC = () => {
-  const navigate = useNavigate();
-  const { setToken } = useToken();
+  const { login } = useStoreActions((action) => action.user);
+  const { isLoading } = useStoreState((state) => state.user);
   const classes = useStyles();
-
-  const handleNavigation = useCallback(() => {
-    navigate('/administration');
-  }, [navigate]);
-
-  const handleSubmit = useCallback(
-    (request: Login, _) => {
-      login(request)
-        .then((response) => {
-          if (response.data.jwt) {
-            localStorage.setItem('token', response.data.jwt);
-            setToken(response.data.jwt);
-          }
-        })
-        .then(handleNavigation);
-    },
-    [handleNavigation, setToken],
-  );
 
   const validationSchema = useMemo(
     () =>
@@ -58,7 +39,7 @@ export const LoginForm: React.FC = () => {
       <Formik<Login>
         initialValues={{ email: '', password: '' }}
         validationSchema={validationSchema}
-        onSubmit={handleSubmit}
+        onSubmit={login}
         validateOnMount
       >
         {(props) => (
@@ -68,46 +49,54 @@ export const LoginForm: React.FC = () => {
             alignItems="center"
             spacing={2}
           >
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                name="email"
-                color="primary"
-                value={props.values.email}
-                type="email"
-                placeholder="Email"
-                onKeyPress={(event) => {
-                  if (event.key === 'Enter') {
-                    props.submitForm();
-                  }
-                }}
-                onChange={props.handleChange}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                name="password"
-                color="primary"
-                value={props.values.password}
-                type="password"
-                placeholder="Password"
-                onKeyPress={(event) => {
-                  if (event.key === 'Enter') {
-                    props.submitForm();
-                  }
-                }}
-                onChange={props.handleChange}
-              />
-            </Grid>
+            {isLoading ? (
+              <Grid item xs={12}>
+                <CircularProgress />
+              </Grid>
+            ) : (
+              <>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    name="email"
+                    color="primary"
+                    value={props.values.email}
+                    type="email"
+                    placeholder="Email"
+                    onKeyPress={(event) => {
+                      if (event.key === 'Enter') {
+                        props.submitForm();
+                      }
+                    }}
+                    onChange={props.handleChange}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    variant="outlined"
+                    name="password"
+                    color="primary"
+                    value={props.values.password}
+                    type="password"
+                    placeholder="Password"
+                    onKeyPress={(event) => {
+                      if (event.key === 'Enter') {
+                        props.submitForm();
+                      }
+                    }}
+                    onChange={props.handleChange}
+                  />
+                </Grid>
+              </>
+            )}
             <Grid item xs={4}>
               <Button
                 onClick={props.submitForm}
                 color="primary"
                 variant="contained"
-                disabled={!props.isValid}
+                disabled={!props.isValid || isLoading}
                 fullWidth
               >
                 <Typography>Login</Typography>

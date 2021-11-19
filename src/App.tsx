@@ -1,24 +1,24 @@
 import React from 'react';
 import { BrowserRouter as Router } from 'react-router-dom';
 import './App.css';
-import { TokenContextProvider } from './hooks/useToken';
 import { Content } from './pages/content';
 import { CssBaseline } from '@material-ui/core';
-import { UserContextProvider } from './hooks/useUser';
 import { ThemeContextProvider } from './hooks/useTheme';
+import { StoreProvider } from './hooks/useStore';
+import { SnackbarProvider } from 'notistack';
 
 const App: React.FC = () => {
   return (
-    <ThemeContextProvider>
-      <TokenContextProvider>
-        <UserContextProvider>
+    <SnackbarProvider>
+      <ThemeContextProvider>
+        <StoreProvider>
           <Router>
             <CssBaseline />
             <Content />
           </Router>
-        </UserContextProvider>
-      </TokenContextProvider>
-    </ThemeContextProvider>
+        </StoreProvider>
+      </ThemeContextProvider>
+    </SnackbarProvider>
   );
 };
 

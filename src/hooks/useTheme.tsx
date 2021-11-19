@@ -42,7 +42,7 @@ export const ThemeContextProvider: React.FC = ({ children }) => {
     typography: {
       fontFamily: fontFamilies,
       h6: {
-        color: mode === 'dark' ? lightGrey : '#FFF',
+        color: '#FFF',
       },
     },
     breakpoints: {},
