@@ -1,7 +1,7 @@
-import { User } from './__generated__';
-
 export type AccountType = 'Manager' | 'Client' | 'PersonalTrainer';
 
-export interface UserCreateDTO extends Omit<User, 'userId' | 'accountType'> {
-  accountType: AccountType;
-}
+export type TypedOmit<T, K extends keyof T> = Omit<T, K>;
+export type NonNullable<T> = Exclude<T, null | undefined>;
+export type NoUndefinedField<T> = {
+  [P in keyof T]-?: NonNullable<T[P]>;
+};

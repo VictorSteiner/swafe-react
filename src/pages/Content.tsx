@@ -2,7 +2,7 @@
 /* eslint-disable react/jsx-no-bind */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   Route,
   Routes,
@@ -10,7 +10,6 @@ import {
   useLocation,
   Navigate,
 } from 'react-router-dom';
-import { useToken } from '../hooks/useToken';
 import { LoginIndex } from './login';
 import { SideNavigation } from '../components/navigation/side-navigation';
 import Account from '@material-ui/icons/SupervisorAccount';
@@ -31,11 +30,11 @@ import {
 import { WorkoutsIndex } from './workouts';
 import { ProgramsIndex } from './programs';
 import { SettingsIndex } from './settings';
-import { useUser } from '../hooks/useUser';
 import { PersonalTrainerPage } from './trainer';
 import { ManagerPage } from './manager';
 import { CustomerPage } from './customer';
 import { useTheme } from '../hooks/useTheme';
+import { useStoreActions, useStoreState } from '../hooks/useStore';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -82,17 +81,21 @@ interface LinkListProps {
 }
 
 export const Content: React.FC = () => {
-  const { decoded, setToken } = useToken();
-  const { user } = useUser();
+  const { decodedToken, loggedInUser } = useStoreState((state) => state.user);
+  const { logout } = useStoreActions((action) => action.user);
   const { mode, setMode } = useTheme();
   const classes = useStyles();
   const navigate = useNavigate();
   const location = useLocation();
 
+  useEffect(() => console.log(decodedToken), [decodedToken]);
+
   const isLoggedIn = useMemo(
     () =>
-      decoded?.exp ? Number.parseInt(decoded?.exp) * 1000 > Date.now() : false,
-    [decoded?.exp],
+      decodedToken?.exp
+        ? Number.parseInt(decodedToken?.exp) * 1000 > Date.now()
+        : false,
+    [decodedToken?.exp],
   );
 
   if (!isLoggedIn) {
@@ -128,7 +131,7 @@ export const Content: React.FC = () => {
   ];
 
   const AccountType = (): JSX.Element => {
-    switch (user?.accountType ?? '') {
+    switch (loggedInUser?.accountType ?? '') {
       case 'Manager':
         return <ManagerPage />;
       case 'Client':
@@ -172,13 +175,7 @@ export const Content: React.FC = () => {
             ))}
           </Grid>
           <Grid item>
-            <ListItem
-              button
-              onClick={() => {
-                localStorage.removeItem('token');
-                setToken(null);
-              }}
-            >
+            <ListItem button onClick={logout()}>
               <ListItemIcon style={{ marginLeft: 4 }}>
                 <Logout className={classes.icon} />
               </ListItemIcon>
@@ -199,6 +196,11 @@ export const Content: React.FC = () => {
                   <LightMode className={classes.icon} />
                 )}
               </ListItemIcon>
+              <ListItemText>
+                <Typography variant="h6" className={classes.icon}>
+                  {mode === 'light' ? 'Lightmode' : 'Darkmode'}
+                </Typography>
+              </ListItemText>
             </ListItem>
           </Grid>
         </Grid>
@@ -210,6 +212,7 @@ export const Content: React.FC = () => {
             <Route path="/workouts/*" element={<WorkoutsIndex />} />
             <Route path="/programs/*" element={<ProgramsIndex />} />
             <Route path="/settings/*" element={<SettingsIndex />} />
+            <Route path="/login" element={<Navigate replace to="/account" />} />
             <Route path="*" element={<Navigate replace to="/account" />} />
           </Routes>
         </main>

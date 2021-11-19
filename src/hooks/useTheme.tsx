@@ -23,13 +23,6 @@ const fontFamilies = [
   'sans-serif',
 ].join(',');
 
-// const primaryDark = '#003060';
-const primary = '#055C9D';
-
-const darkGrey = '#202020';
-// const grey = '#3f3f3f';
-const lightGrey = '#6f6f6f';
-
 const ThemeContext = createContext({
   mode: {} as PaletteType,
   setMode: {} as Dispatch<SetStateAction<PaletteType>>,
@@ -42,15 +35,12 @@ export const ThemeContextProvider: React.FC = ({ children }) => {
     typography: {
       fontFamily: fontFamilies,
       h6: {
-        color: mode === 'dark' ? lightGrey : '#FFF',
+        color: '#FFF',
       },
     },
     breakpoints: {},
     palette: {
       type: mode,
-      primary: {
-        main: mode === 'dark' ? darkGrey : primary,
-      },
     },
   });
 
