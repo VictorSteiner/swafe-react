@@ -13,7 +13,8 @@ import Workout from '@material-ui/icons/FitnessCenter';
 import Program from '@material-ui/icons/Assignment';
 import Settings from '@material-ui/icons/Settings';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useStoreActions } from '../../hooks/useStore';
+import { useStoreActions, useStoreState } from '../../hooks/useStore';
+import { useCallback } from 'react';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -48,34 +49,52 @@ interface LinkListProps {
   label: string;
   to: string;
   icon: React.ReactNode;
+  policy: string[];
 }
 
 export const DefaultSideNavigation: React.FC = () => {
   const classes = useStyles();
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useStoreActions((action) => action.user);
+  const { loggedInUser } = useStoreState((state) => state.user);
+  const { setLoggedIn, setLoggedInUser } = useStoreActions(
+    (action) => action.user,
+  );
+
+  const handleLogout = useCallback(() => {
+    setLoggedIn(false);
+    setLoggedInUser(undefined);
+  }, [setLoggedIn, setLoggedInUser]);
 
   const links: LinkListProps[] = [
     {
       icon: <Account className={classes.icon} />,
-      label: 'Account',
+      label:
+        loggedInUser?.accountType === 'Manager'
+          ? 'Trainers'
+          : loggedInUser?.accountType === 'PersonalTrainer'
+          ? 'Clients'
+          : 'Account',
       to: '/account',
+      policy: ['PersonalTrainer', 'Client', 'Manager'],
     },
     {
       icon: <Workout className={classes.icon} />,
-      label: 'Workouts',
-      to: '/workouts',
+      label: 'Exercises',
+      to: '/exercises',
+      policy: ['PersonalTrainer'],
     },
     {
       icon: <Program className={classes.icon} />,
       label: 'Programs',
       to: '/programs',
+      policy: ['PersonalTrainer', 'Client'],
     },
     {
       icon: <Settings className={classes.icon} />,
       label: 'Settings',
       to: '/settings',
+      policy: ['PersonalTrainer', 'Client', 'Manager'],
     },
   ];
 
@@ -88,27 +107,32 @@ export const DefaultSideNavigation: React.FC = () => {
         justifyContent="space-between"
       >
         <Grid item>
-          {links.map((link) => (
-            <ListItem
-              // eslint-disable-next-line react/jsx-no-bind
-              onClick={() => navigate(link.to)}
-              button
-              key={link.label}
-              className={
-                link.to === location.pathname ? classes.link : undefined
-              }
-            >
-              <ListItemIcon style={{ marginLeft: 4 }}>{link.icon}</ListItemIcon>
-              <ListItemText>
-                <Typography variant="h6" className={classes.icon}>
-                  {link.label}
-                </Typography>
-              </ListItemText>
-            </ListItem>
-          ))}
+          {links.map(
+            (link) =>
+              link.policy.includes(loggedInUser?.accountType ?? '') && (
+                <ListItem
+                  // eslint-disable-next-line react/jsx-no-bind
+                  onClick={() => navigate(link.to)}
+                  button
+                  key={link.label}
+                  className={
+                    link.to === location.pathname ? classes.link : undefined
+                  }
+                >
+                  <ListItemIcon style={{ marginLeft: 4 }}>
+                    {link.icon}
+                  </ListItemIcon>
+                  <ListItemText>
+                    <Typography variant="h6" className={classes.icon}>
+                      {link.label}
+                    </Typography>
+                  </ListItemText>
+                </ListItem>
+              ),
+          )}
         </Grid>
         <Grid item>
-          <ListItem button onClick={logout()}>
+          <ListItem button onClick={handleLogout}>
             <ListItemIcon style={{ marginLeft: 4 }}>
               <Logout className={classes.icon} />
             </ListItemIcon>

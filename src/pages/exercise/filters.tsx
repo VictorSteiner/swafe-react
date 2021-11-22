@@ -1,8 +1,9 @@
 import { Grid, TextField } from '@material-ui/core';
 import React, { ChangeEvent, useCallback, useState } from 'react';
+import { ExerciseDrawer } from '../../components/drawer/exerciseDrawer';
 import { useStoreActions } from '../../hooks/useStore';
 
-export const WorkoutFilters: React.FC = () => {
+export const ExerciseFilters: React.FC = () => {
   const { setFilter } = useStoreActions((actions) => actions.exercise);
 
   const [query, setQuery] = useState('');
@@ -18,6 +19,9 @@ export const WorkoutFilters: React.FC = () => {
 
   return (
     <Grid container spacing={2} alignContent="center">
+      <Grid item>
+        <ExerciseDrawer />
+      </Grid>
       <Grid item>
         <TextField
           placeholder="Workout"

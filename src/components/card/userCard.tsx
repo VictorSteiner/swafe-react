@@ -1,5 +1,5 @@
 import { User } from '../../services/user';
-import { Delete, Edit, OpenInNew } from '@material-ui/icons';
+import { Delete } from '@material-ui/icons';
 import {
   Avatar,
   Card,
@@ -78,12 +78,6 @@ export const UserCard: React.FC<UserCardProps> = ({ user, workouts }) => {
         }
         action={
           <>
-            <IconButton onClick={handleDelete}>
-              <OpenInNew className={classes.openIcon} />
-            </IconButton>
-            <IconButton onClick={handleDelete}>
-              <Edit className={classes.updateIcon} />
-            </IconButton>
             <IconButton onClick={handleDelete}>
               <Delete className={classes.deleteIcon} />
             </IconButton>

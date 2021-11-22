@@ -35,6 +35,7 @@ export interface UserModel
   extends IModel<UserModel, User, UserDTO, UserFilter> {
   isLoggedIn: boolean;
   loggedInUser: User | undefined;
+  trainer: User | undefined;
   token: Token | undefined;
   decodedToken: DecodedToken | undefined;
   newPassword: NewPassword | undefined;
@@ -44,16 +45,17 @@ export interface UserModel
 
   setLoggedIn: Action<UserModel, boolean>;
   setLoggedInUser: Action<UserModel, User | undefined>;
+  setTrainer: Action<UserModel, User | undefined>;
   setToken: Action<UserModel, Token | undefined>;
   setDecodedToken: Action<UserModel, Token | undefined>;
   setNewPassword: Action<UserModel, NewPassword | undefined>;
   setUsers: Action<UserModel, User[]>;
 
   login: Thunk<UserModel, Login, Injections, StoreModel>;
-  logout: Thunk<UserModel, void, Injections, StoreModel>;
   changePassword: Thunk<UserModel, NewPassword, Injections, StoreModel>;
 
   onLogin: ThunkOn<UserModel, Injections, StoreModel>;
+  onSetLoggedInUser: ThunkOn<UserModel, Injections, StoreModel>;
 }
 
 export const user: UserModel = {
@@ -64,15 +66,28 @@ export const user: UserModel = {
   updateInput: undefined,
   filter: defaultFilter,
   loggedInUser: undefined,
+  trainer: undefined,
   token: undefined,
   decodedToken: undefined,
   newPassword: undefined,
   users: [],
   trainers: computed((state) =>
-    state.users.filter((x) => x.accountType === 'PersonalTrainer'),
+    state.users.filter(
+      (x) =>
+        x.accountType === 'PersonalTrainer' &&
+        `${x.firstName} ${x.lastName}`
+          .toLowerCase()
+          .includes(state.filter.name.toLowerCase()),
+    ),
   ),
   clients: computed((state) =>
-    state.users.filter((x) => x.accountType === 'Client'),
+    state.users.filter(
+      (x) =>
+        x.accountType === 'Client' &&
+        `${x.firstName} ${x.lastName}`
+          .toLowerCase()
+          .includes(state.filter.name.toLowerCase()),
+    ),
   ),
 
   // Update state
@@ -93,6 +108,9 @@ export const user: UserModel = {
   }),
   setLoggedInUser: action((state, payload) => {
     state.loggedInUser = payload;
+  }),
+  setTrainer: action((state, payload) => {
+    state.trainer = payload;
   }),
   setToken: action((state, payload) => {
     state.token = payload;
@@ -183,11 +201,6 @@ export const user: UserModel = {
       }
     },
   ),
-  logout: thunk((_) => {
-    // action.setToken(undefined);
-    // action.setDecodedToken(undefined);
-    // action.setLoggedIn(false);
-  }),
 
   // Event listeners
   onSideEffect: thunkOn(
@@ -229,11 +242,25 @@ export const user: UserModel = {
       const { user } = getStoreState();
       if (user.decodedToken?.UserId) {
         try {
-          var response = await service.getSingle(user.decodedToken.UserId);
+          const response = await service.getSingle(user.decodedToken.UserId);
           actions.setLoggedInUser(response.data);
         } catch (error) {
           throw error;
         }
+      }
+    },
+  ),
+  onSetLoggedInUser: thunkOn(
+    (action) => [action.setLoggedInUser],
+    async (actions, _, { injections: { userService: service }, getState }) => {
+      const { loggedInUser } = getState();
+      if (!!loggedInUser?.personalTrainerId) {
+        const response = await service.getSingle(
+          `${loggedInUser.personalTrainerId}`,
+        );
+        actions.setTrainer(response.data);
+      } else {
+        actions.setTrainer(undefined);
       }
     },
   ),

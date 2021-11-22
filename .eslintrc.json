@@ -39,7 +39,7 @@
 
     // React
     "react/jsx-no-bind": "error",
-    "react/display-name": "error",
+    "react/display-name": "warn",
     "react/no-array-index-key": "error",
     "react/react-in-jsx-scope": "off",
     "react/prop-types": "off",

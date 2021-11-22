@@ -1,13 +1,13 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Route, Routes, Navigate } from 'react-router-dom';
 import { LoginIndex } from './login';
 import { makeStyles } from '@material-ui/core/styles';
-import { WorkoutsIndex } from './workouts';
+import { ExercisesIndex } from './exercise';
 import { ProgramsIndex } from './programs';
 import { SettingsIndex } from './settings';
 import { PersonalTrainerPage } from './trainer';
 import { ManagerPage } from './manager';
-import { CustomerPage } from './customer';
+import { CustomerPage } from './client';
 import { useStoreState } from '../hooks/useStore';
 import { DefaultSideNavigation } from '../components/navigation/defaultSideNavigation';
 
@@ -34,6 +34,39 @@ export const Content: React.FC = () => {
   const loggedInUser = useStoreState((state) => state.user.loggedInUser);
   const classes = useStyles();
 
+  const mainRoutes = useMemo(
+    () => [
+      {
+        path: '/account',
+        element:
+          loggedInUser?.accountType === 'Manager' ? (
+            <ManagerPage />
+          ) : loggedInUser?.accountType === 'Client' ? (
+            <CustomerPage />
+          ) : (
+            <PersonalTrainerPage />
+          ),
+        policy: ['PersonalTrainer', 'Client', 'Manager'],
+      },
+      {
+        path: '/exercises/*',
+        element: <ExercisesIndex />,
+        policy: ['PersonalTrainer'],
+      },
+      {
+        path: '/programs/*',
+        element: <ProgramsIndex />,
+        policy: ['PersonalTrainer', 'Client'],
+      },
+      {
+        path: '/settings/*',
+        element: <SettingsIndex />,
+        policy: ['PersonalTrainer', 'Client', 'Manager'],
+      },
+    ],
+    [loggedInUser?.accountType],
+  );
+
   if (!isLoggedIn) {
     return (
       <Routes>
@@ -43,29 +76,18 @@ export const Content: React.FC = () => {
     );
   }
 
-  const AccountType = (): JSX.Element => {
-    switch (loggedInUser?.accountType ?? '') {
-      case 'Manager':
-        return <ManagerPage />;
-      case 'Client':
-        return <CustomerPage />;
-      case 'PersonalTrainer':
-        return <PersonalTrainerPage />;
-      default:
-        return <></>;
-    }
-  };
-
   return (
     <div className={classes.root}>
       <DefaultSideNavigation />
       <main className={classes.content}>
         <main style={{ flex: 1, height: '100%', overflowX: 'hidden' }}>
           <Routes>
-            <Route path="/account/*" element={AccountType()} />
-            <Route path="/workouts/*" element={<WorkoutsIndex />} />
-            <Route path="/programs/*" element={<ProgramsIndex />} />
-            <Route path="/settings/*" element={<SettingsIndex />} />
+            {mainRoutes.map(
+              (route) =>
+                route.policy.includes(loggedInUser?.accountType ?? '') && (
+                  <Route key={route.path} {...route} />
+                ),
+            )}
             <Route path="*" element={<Navigate replace to="/account" />} />
           </Routes>
         </main>
