@@ -1,3 +1,5 @@
+/* eslint-disable react/jsx-no-bind */
+/* eslint-disable max-lines */
 import {
   Button,
   Grid,
@@ -6,16 +8,18 @@ import {
   Typography,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Edit, Mail, Person, PersonAdd, VpnKey } from '@material-ui/icons';
+import { AddCircle, Description, Edit, Title } from '@material-ui/icons';
 import { Formik } from 'formik';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { NoUndefinedField } from '../../api/types';
+import { WorkoutProgram } from '../../api/__generated__';
 import { useStoreActions, useStoreState } from '../../hooks/useStore';
-import { User } from '../../services/user';
+import { ClientAutocomplete } from '../autocomplete/clientAutocomplete';
+import { ExerciseAutocomplete } from '../autocomplete/exerciseAutocomplete';
 import { CustomDrawer } from './customDrawer';
 
-type UpdateUserDrawerProps = {
-  user?: User;
+type WorkoutProgramDrawerProps = {
+  workoutProgram?: WorkoutProgram;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -30,50 +34,57 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const UserDrawer: React.FC<UpdateUserDrawerProps> = ({ user }) => {
+export const WorkoutProgramDrawer: React.FC<WorkoutProgramDrawerProps> = ({
+  workoutProgram,
+}) => {
   const classes = useStyles();
   const { loggedInUser } = useStoreState((state) => state.user);
-  const { update, create } = useStoreActions((action) => action.user);
+
+  const { update, create } = useStoreActions((action) => action.workout);
   const [open, setOpen] = useState(false);
+
+  const personalTrainerId = useMemo(
+    () =>
+      loggedInUser?.accountType === 'PersonalTrainer'
+        ? loggedInUser.userId
+        : null,
+    [loggedInUser?.accountType, loggedInUser?.userId],
+  );
 
   const handleOnClose = useCallback(() => setOpen(false), []);
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const handleOnOpen = useCallback(() => setOpen(true), []);
 
   const handleSubmit = useCallback(
-    (payload: NoUndefinedField<User>) => {
-      if (user) {
+    (payload: NoUndefinedField<WorkoutProgram> | WorkoutProgram) => {
+      if (workoutProgram) {
         update(payload);
       } else {
-        create(payload);
+        create(payload as NoUndefinedField<WorkoutProgram>);
       }
       setOpen(false);
     },
-    [create, update, user],
+    [create, update, workoutProgram],
   );
+
+  if (!personalTrainerId) {
+    return <>Error!</>;
+  }
 
   return (
     <>
       <CustomDrawer open={open} onClose={handleOnClose} onOpen={handleOnOpen}>
-        <Formik<User>
+        <Formik<NoUndefinedField<WorkoutProgram>>
           initialValues={
-            user
-              ? user
+            workoutProgram
+              ? (workoutProgram as NoUndefinedField<WorkoutProgram>)
               : {
-                  personalTrainerId:
-                    loggedInUser?.accountType === 'PersonalTrainer'
-                      ? loggedInUser.userId
-                      : 0,
-                  userId: 0,
-                  firstName: '',
-                  lastName: '',
-                  email: '',
-                  password: '',
-                  accountType:
-                    loggedInUser?.accountType === 'Manager'
-                      ? 'PersonalTrainer'
-                      : 'Client',
+                  personalTrainerId,
+                  clientId: 0,
+                  description: '',
+                  exercises: [],
+                  name: '',
+                  workoutProgramId: 0,
                 }
           }
           onSubmit={handleSubmit}
@@ -84,65 +95,60 @@ export const UserDrawer: React.FC<UpdateUserDrawerProps> = ({ user }) => {
                 <Grid item xs={12} container>
                   <Grid item xs={12}>
                     <Typography variant="h4">
-                      {user
-                        ? `Update ${user.firstName}`
-                        : loggedInUser?.accountType === 'PersonalTrainer'
-                        ? 'Create new client'
-                        : 'Create new personal trainer'}
+                      {workoutProgram ? `Update program` : 'Create program'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle1">
-                      Fill in form and save changes to user
+                      {workoutProgram
+                        ? 'Fill in form and save changes to program'
+                        : 'Fill in form and create program'}
                     </Typography>
                   </Grid>
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    name="firstName"
-                    value={props.values.firstName}
+                    name="name"
+                    value={props.values.name}
                     variant="outlined"
-                    label="First name"
+                    label="Name"
                     onChange={props.handleChange}
-                    InputProps={{ endAdornment: <Person color="primary" /> }}
+                    InputProps={{
+                      endAdornment: <Title color="primary" />,
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
-                    name="lastName"
-                    value={props.values.lastName}
+                    multiline
+                    name="description"
+                    value={props.values.description}
                     variant="outlined"
-                    label="Last name"
+                    label="Description"
                     onChange={props.handleChange}
-                    InputProps={{ endAdornment: <Person color="primary" /> }}
+                    InputProps={{
+                      endAdornment: <Description color="primary" />,
+                    }}
                   />
                 </Grid>
                 <Grid item xs={12}>
-                  <TextField
-                    fullWidth
-                    name="email"
-                    value={props.values.email}
-                    variant="outlined"
-                    label="Email"
-                    onChange={props.handleChange}
-                    InputProps={{ endAdornment: <Mail color="primary" /> }}
+                  <ClientAutocomplete
+                    value={props.values.clientId ?? null}
+                    onChange={(value) => {
+                      props.setFieldValue('clientId', value);
+                    }}
                   />
                 </Grid>
-                {!user && (
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      name="password"
-                      value={props.values.password}
-                      variant="outlined"
-                      label="Password"
-                      onChange={props.handleChange}
-                      InputProps={{ endAdornment: <VpnKey color="primary" /> }}
-                    />
-                  </Grid>
-                )}
+                <Grid item xs={12}>
+                  <ExerciseAutocomplete
+                    value={props.values.exercises ?? []}
+                    onChange={(values) => {
+                      props.setFieldValue('exercises', values);
+                    }}
+                  />
+                </Grid>
                 <Grid
                   item
                   xs={12}
@@ -162,7 +168,9 @@ export const UserDrawer: React.FC<UpdateUserDrawerProps> = ({ user }) => {
                         props.handleSubmit();
                       }}
                     >
-                      <Typography>{user ? 'Save' : 'Create'}</Typography>
+                      <Typography>
+                        {workoutProgram ? 'Save' : 'Create'}
+                      </Typography>
                     </Button>
                   </Grid>
                   <Grid item xs={6}>
@@ -182,13 +190,13 @@ export const UserDrawer: React.FC<UpdateUserDrawerProps> = ({ user }) => {
           )}
         </Formik>
       </CustomDrawer>
-      {user ? (
+      {workoutProgram ? (
         <IconButton onClick={handleOnOpen}>
           <Edit />
         </IconButton>
       ) : (
         <IconButton onClick={handleOnOpen}>
-          <PersonAdd />
+          <AddCircle />
         </IconButton>
       )}
     </>

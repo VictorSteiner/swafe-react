@@ -1,5 +1,14 @@
 /* eslint-disable no-shadow */
-import { action, Action, thunk, Thunk, thunkOn } from 'easy-peasy';
+import {
+  action,
+  Action,
+  computed,
+  Computed,
+  thunk,
+  Thunk,
+  thunkOn,
+} from 'easy-peasy';
+import { TypedOmit } from '../api/types';
 import { Exercise } from '../api/__generated__';
 import { ExerciseDTO } from '../services/exercise';
 import { Injections, IModel, StoreModel } from './store';
@@ -12,18 +21,30 @@ const defaultFilter: ExerciseFilter = {
   name: '',
 };
 
+type AddToProgramPayload = {
+  id: string;
+  input: TypedOmit<
+    Exercise,
+    'exerciseId' | 'workoutProgramId' | 'personalTrainerId'
+  >;
+};
+
 export interface ExerciseModel
   extends IModel<ExerciseModel, Exercise, ExerciseDTO, ExerciseFilter> {
   exercises: Exercise[];
-  activeExercise: Exercise | undefined;
-  // searchExercises: Computed<ExerciseModel, Exercise[], StoreModel>;
+  searchExercises: Computed<ExerciseModel, Exercise[], StoreModel>;
 
   setExercises: Action<ExerciseModel, Exercise[]>;
-  setActiveExercise: Action<ExerciseModel, Partial<Exercise>>;
 
   setIsLoading: Action<ExerciseModel, boolean>;
 
   fetchSingle: Thunk<ExerciseModel, string, Injections, StoreModel>;
+  addToProgram: Thunk<
+    ExerciseModel,
+    AddToProgramPayload,
+    Injections,
+    StoreModel
+  >;
 }
 
 export const exercise: ExerciseModel = {
@@ -32,8 +53,12 @@ export const exercise: ExerciseModel = {
   createInput: undefined,
   updateInput: undefined,
   exercises: [],
-  activeExercise: undefined,
   filter: defaultFilter,
+  searchExercises: computed((state) => {
+    return state.exercises.filter((x) =>
+      x.name?.toLowerCase().includes(state.filter.name.toLowerCase()),
+    );
+  }),
 
   // Action
   setIsLoading: action((state, payload) => {
@@ -47,9 +72,6 @@ export const exercise: ExerciseModel = {
   }),
   setExercises: action((state, payload) => {
     state.exercises = payload;
-  }),
-  setActiveExercise: action((state, payload) => {
-    state.activeExercise = { ...state.activeExercise, ...payload };
   }),
   setFilter: action((state, payload) => {
     state.filter = { ...state.filter, ...payload };
@@ -66,16 +88,9 @@ export const exercise: ExerciseModel = {
       }
     },
   ),
-  fetchSingle: thunk(
-    async (actions, payload, { injections: { exerciseService: service } }) => {
-      try {
-        var response = await service.getSingle(payload);
-        actions.setActiveExercise(response.data);
-      } catch (error) {
-        throw error;
-      }
-    },
-  ),
+  fetchSingle: thunk((_) => {
+    throw 'Not implemented';
+  }),
   create: thunk(
     async (action, payload, { injections: { exerciseService: service } }) => {
       try {
@@ -102,6 +117,16 @@ export const exercise: ExerciseModel = {
     async (action, payload, { injections: { exerciseService: service } }) => {
       try {
         await service.delete(payload);
+        action.fetchAll();
+      } catch (error) {
+        throw error;
+      }
+    },
+  ),
+  addToProgram: thunk(
+    async (action, payload, { injections: { exerciseService: service } }) => {
+      try {
+        await service.addToProgram(payload.id, payload.input);
         action.fetchAll();
       } catch (error) {
         throw error;

@@ -21,29 +21,8 @@ interface UserCardProps {
 }
 
 const useStyles = makeStyles((theme) => ({
-  card: {
-    padding: theme.spacing(2),
-    height: theme.spacing(18),
-  },
-  add: {
-    border: `4px dashed ${theme.palette.success.main}`,
-  },
-  delete: {
-    border: `4px dashed ${theme.palette.error.main}`,
-  },
-  addIcon: {
-    color: theme.palette.success.main,
-    height: theme.spacing(6),
-    width: 'auto',
-  },
   deleteIcon: {
     color: theme.palette.secondary.main,
-  },
-  updateIcon: {
-    color: theme.palette.secondary.main,
-  },
-  openIcon: {
-    color: theme.palette.primary.main,
   },
 }));
 

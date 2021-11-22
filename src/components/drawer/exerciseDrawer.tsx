@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
 import {
   Button,
@@ -24,6 +25,7 @@ import { CustomDrawer } from './customDrawer';
 
 type UpdateUserDrawerProps = {
   exercise?: Exercise;
+  workoutProgramId?: number;
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -40,10 +42,13 @@ const useStyles = makeStyles((theme) => ({
 
 export const ExerciseDrawer: React.FC<UpdateUserDrawerProps> = ({
   exercise,
+  workoutProgramId,
 }) => {
   const classes = useStyles();
   const { loggedInUser } = useStoreState((state) => state.user);
-  const { update, create } = useStoreActions((action) => action.exercise);
+  const { update, create, addToProgram } = useStoreActions(
+    (action) => action.exercise,
+  );
   const [open, setOpen] = useState(false);
 
   const personalTrainerId = useMemo(
@@ -56,18 +61,20 @@ export const ExerciseDrawer: React.FC<UpdateUserDrawerProps> = ({
 
   const handleOnClose = useCallback(() => setOpen(false), []);
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   const handleOnOpen = useCallback(() => setOpen(true), []);
 
   const handleSubmit = useCallback(
     (payload: NoUndefinedField<ExerciseDto> | Exercise) => {
       if (exercise) {
         update(payload);
+      } else if (workoutProgramId) {
+        addToProgram({ id: `${workoutProgramId}`, input: payload });
       } else {
         create(payload as NoUndefinedField<TypedOmit<Exercise, 'exerciseId'>>);
       }
+      setOpen(false);
     },
-    [create, exercise, update],
+    [addToProgram, create, exercise, update, workoutProgramId],
   );
 
   return (
@@ -95,12 +102,20 @@ export const ExerciseDrawer: React.FC<UpdateUserDrawerProps> = ({
                 <Grid item xs={12} container>
                   <Grid item xs={12}>
                     <Typography variant="h4">
-                      {exercise ? `Update exercise` : 'Create exercise'}
+                      {exercise
+                        ? `Update exercise`
+                        : workoutProgramId
+                        ? 'Add exercise to program'
+                        : 'Create exercise'}
                     </Typography>
                   </Grid>
                   <Grid item xs={12}>
                     <Typography variant="subtitle1">
-                      Fill in form and save changes to user
+                      {exercise
+                        ? 'Fill in form and save changes to exercise'
+                        : workoutProgramId
+                        ? 'Fill in form and add exercise to program'
+                        : 'Fill in form and create exercise'}
                     </Typography>
                   </Grid>
                 </Grid>
@@ -120,6 +135,7 @@ export const ExerciseDrawer: React.FC<UpdateUserDrawerProps> = ({
                 <Grid item xs={12}>
                   <TextField
                     fullWidth
+                    multiline
                     name="description"
                     value={props.values.description}
                     variant="outlined"
@@ -187,7 +203,13 @@ export const ExerciseDrawer: React.FC<UpdateUserDrawerProps> = ({
                         props.handleSubmit();
                       }}
                     >
-                      <Typography>{exercise ? 'Save' : 'Create'}</Typography>
+                      <Typography>
+                        {exercise
+                          ? 'Save'
+                          : workoutProgramId
+                          ? 'Add'
+                          : 'Create'}
+                      </Typography>
                     </Button>
                   </Grid>
                   <Grid item xs={6}>

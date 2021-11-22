@@ -1,5 +1,8 @@
-import { Card, CircularProgress, Grid, Typography } from '@material-ui/core';
+import { CircularProgress, Grid, Typography } from '@material-ui/core';
 import React from 'react';
+import { NoUndefinedField } from '../../api/types';
+import { Exercise } from '../../api/__generated__';
+import { ExerciseCard } from '../../components/card/exerciseCard';
 import { useStoreState } from '../../hooks/useStore';
 
 export const ExerciseList: React.FC = () => {
@@ -7,14 +10,15 @@ export const ExerciseList: React.FC = () => {
 
   return (
     <Grid container spacing={2}>
-      {exercises.length > 0 &&
-        exercises.map((exercise) => (
-          <Card key={exercise.exerciseId}>
-            <Grid item xs={12}>
-              <Typography>{exercise.name}</Typography>
+      {exercises.length > 0 && (
+        <Grid container spacing={2}>
+          {exercises.map((exercise) => (
+            <Grid item key={exercise.exerciseId} xs={12} lg={6}>
+              <ExerciseCard exercise={exercise as NoUndefinedField<Exercise>} />
             </Grid>
-          </Card>
-        ))}
+          ))}
+        </Grid>
+      )}
       {isLoading && (
         <Grid container justifyContent="center">
           <Grid item>
