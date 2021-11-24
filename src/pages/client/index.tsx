@@ -19,7 +19,7 @@ export const CustomerPage: React.FC = () => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <Typography variant="h2" color="primary">
-            {loggedInUser?.firstName + ' ' + loggedInUser?.lastName}
+            Account
           </Typography>
         </Grid>
         <Grid item xs={12}>

@@ -94,7 +94,7 @@ export const DefaultSideNavigation: React.FC = () => {
       icon: <Settings className={classes.icon} />,
       label: 'Settings',
       to: '/settings',
-      policy: ['PersonalTrainer', 'Client', 'Manager'],
+      policy: ['PersonalTrainer', 'Client'],
     },
   ];
 

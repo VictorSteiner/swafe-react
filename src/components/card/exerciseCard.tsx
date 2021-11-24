@@ -10,7 +10,7 @@ import { Delete } from '@material-ui/icons';
 import { useCallback } from 'react';
 import { NoUndefinedField } from '../../api/types';
 import { Exercise } from '../../api/__generated__';
-import { useStoreActions } from '../../hooks/useStore';
+import { useStoreActions, useStoreState } from '../../hooks/useStore';
 import { ExerciseDrawer } from '../drawer/exerciseDrawer';
 
 interface ExerciseCardProps {
@@ -40,6 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
   const classes = useStyles();
+  const { loggedInUser } = useStoreState((state) => state.user);
   const deleteExercise = useStoreActions((action) => action.exercise.delete);
 
   const handleDelete = useCallback(() => {
@@ -57,12 +58,16 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise }) => {
         }`}
         action={
           <>
-            <IconButton>
-              <ExerciseDrawer exercise={exercise} />
-            </IconButton>
-            <IconButton onClick={handleDelete}>
-              <Delete className={classes.deleteIcon} />
-            </IconButton>
+            {loggedInUser?.accountType === 'PersonalTrainer' && (
+              <>
+                <IconButton>
+                  <ExerciseDrawer exercise={exercise} />
+                </IconButton>
+                <IconButton onClick={handleDelete}>
+                  <Delete className={classes.deleteIcon} />
+                </IconButton>
+              </>
+            )}
           </>
         }
       />

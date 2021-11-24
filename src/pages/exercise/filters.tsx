@@ -1,4 +1,5 @@
 import { Grid, TextField } from '@material-ui/core';
+import { Search } from '@material-ui/icons';
 import React, { ChangeEvent, useCallback } from 'react';
 import { ExerciseDrawer } from '../../components/drawer/exerciseDrawer';
 import { useStoreActions, useStoreState } from '../../hooks/useStore';
@@ -22,10 +23,13 @@ export const ExerciseFilters: React.FC = () => {
       </Grid>
       <Grid item>
         <TextField
-          placeholder="Workout"
+          fullWidth
           variant="outlined"
           value={filter.name}
+          placeholder="Search..."
+          label="Search name"
           onChange={handleQueryChange}
+          InputProps={{ endAdornment: <Search color="disabled" /> }}
         />
       </Grid>
     </Grid>

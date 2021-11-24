@@ -1,5 +1,5 @@
 /* eslint-disable no-shadow */
-import { action, Action, thunk, thunkOn } from 'easy-peasy';
+import { action, Action, computed, Computed, thunk, thunkOn } from 'easy-peasy';
 import { WorkoutProgram } from '../api/__generated__';
 import { WorkoutProgramDTO } from '../services/workout';
 import { IModel } from './store';
@@ -20,13 +20,9 @@ export interface WorkoutProgramModel
     WorkoutProgramFilter
   > {
   workoutsPrograms: WorkoutProgram[];
-  activeWorkoutProgram: WorkoutProgram | undefined;
+  workoutProgramsQuery: Computed<WorkoutProgramModel, WorkoutProgram[]>;
 
   setWorkoutPrograms: Action<WorkoutProgramModel, WorkoutProgram[]>;
-  setActiveWorkoutProgram: Action<
-    WorkoutProgramModel,
-    WorkoutProgram | undefined
-  >;
 }
 
 export const workout: WorkoutProgramModel = {
@@ -36,7 +32,11 @@ export const workout: WorkoutProgramModel = {
   createInput: undefined,
   updateInput: undefined,
   workoutsPrograms: [],
-  activeWorkoutProgram: undefined,
+  workoutProgramsQuery: computed((state) =>
+    state.workoutsPrograms.filter((x) =>
+      x.name?.toLowerCase().includes(state.filter.name.toLowerCase()),
+    ),
+  ),
 
   // Action
   setIsLoading: action((state, payload) => {
@@ -50,9 +50,6 @@ export const workout: WorkoutProgramModel = {
   }),
   setWorkoutPrograms: action((state, payload) => {
     state.workoutsPrograms = payload;
-  }),
-  setActiveWorkoutProgram: action((state, payload) => {
-    state.activeWorkoutProgram = { ...state.activeWorkoutProgram, ...payload };
   }),
   setFilter: action((state, payload) => {
     state.filter = { ...state.filter, ...payload };
@@ -69,16 +66,9 @@ export const workout: WorkoutProgramModel = {
       }
     },
   ),
-  fetchSingle: thunk(
-    async (actions, payload, { injections: { workoutService: service } }) => {
-      try {
-        var response = await service.getSingle(payload);
-        actions.setActiveWorkoutProgram(response.data);
-      } catch (error) {
-        throw error;
-      }
-    },
-  ),
+  fetchSingle: thunk((_) => {
+    throw 'Not implemented';
+  }),
   create: thunk(
     async (action, payload, { injections: { workoutService: service } }) => {
       try {

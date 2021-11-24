@@ -3,21 +3,20 @@
 import { ListItem, ListItemText, TextField } from '@material-ui/core';
 import { Search } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
-import { ChangeEvent, useCallback, useEffect, useState } from 'react';
+import { ChangeEvent, useCallback, useEffect } from 'react';
 import { Exercise } from '../../api/__generated__';
 import { useStoreActions, useStoreState } from '../../hooks/useStore';
 
 interface ExerciseAutocompleteProps {
-  onChange: (value: Exercise[]) => void;
-  value: Exercise[];
+  onChange: (value: Exercise | null) => void;
+  value: Exercise | null;
 }
 
 export const ExerciseAutocomplete: React.FC<ExerciseAutocompleteProps> = ({
   ...props
 }) => {
-  const { exercises } = useStoreState((state) => state.exercise);
-  const { fetchAll } = useStoreActions((action) => action.exercise);
-  const [searchResult, setSearchResult] = useState<Exercise[]>(exercises);
+  const { searchExercises } = useStoreState((state) => state.exercise);
+  const { fetchAll, setFilter } = useStoreActions((action) => action.exercise);
 
   useEffect(() => {
     fetchAll();
@@ -25,27 +24,27 @@ export const ExerciseAutocomplete: React.FC<ExerciseAutocompleteProps> = ({
 
   const handleInputChange = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
-      setSearchResult(
-        exercises.filter((x) =>
-          x.name?.toLowerCase().includes(event.target.value.toLowerCase()),
-        ),
-      );
+      setFilter({ name: event.target.value });
     },
-    [exercises],
+    [searchExercises],
   );
+
+  const handleResetFilter = useCallback(() => {
+    setFilter({ name: '' });
+  }, []);
 
   return (
     <Autocomplete
-      multiple
-      disableCloseOnSelect
       value={props.value}
-      options={searchResult}
+      options={searchExercises}
       getOptionSelected={(option, value) =>
         option.exerciseId ? option.exerciseId === value.exerciseId : false
       }
       getOptionLabel={(option) => option.name ?? ''}
       limitTags={3}
+      onOpen={handleResetFilter}
       onChange={(_, values) => props.onChange(values)}
+      onClose={handleResetFilter}
       noOptionsText="No exercises exists"
       loadingText="Searching for exercises..."
       getLimitTagsText={(more) => `+${more} more`}

@@ -6,13 +6,15 @@ import { ExerciseCard } from '../../components/card/exerciseCard';
 import { useStoreState } from '../../hooks/useStore';
 
 export const ExerciseList: React.FC = () => {
-  const { exercises, isLoading } = useStoreState((state) => state.exercise);
+  const { searchExercises, isLoading } = useStoreState(
+    (state) => state.exercise,
+  );
 
   return (
     <Grid container spacing={2}>
-      {exercises.length > 0 && (
+      {searchExercises.length > 0 && (
         <Grid container spacing={2}>
-          {exercises.map((exercise) => (
+          {searchExercises.map((exercise) => (
             <Grid item key={exercise.exerciseId} xs={12} lg={6}>
               <ExerciseCard exercise={exercise as NoUndefinedField<Exercise>} />
             </Grid>
@@ -26,7 +28,7 @@ export const ExerciseList: React.FC = () => {
           </Grid>
         </Grid>
       )}
-      {exercises.length === 0 && !isLoading && (
+      {searchExercises.length === 0 && !isLoading && (
         <Grid container justifyContent="center">
           <Grid item>
             <Typography variant="h5">No exercises exists</Typography>

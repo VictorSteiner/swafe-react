@@ -15,7 +15,6 @@ import { NoUndefinedField } from '../../api/types';
 import { WorkoutProgram } from '../../api/__generated__';
 import { useStoreActions, useStoreState } from '../../hooks/useStore';
 import { ClientAutocomplete } from '../autocomplete/clientAutocomplete';
-import { ExerciseAutocomplete } from '../autocomplete/exerciseAutocomplete';
 import { CustomDrawer } from './customDrawer';
 
 type WorkoutProgramDrawerProps = {
@@ -138,14 +137,6 @@ export const WorkoutProgramDrawer: React.FC<WorkoutProgramDrawerProps> = ({
                     value={props.values.clientId ?? null}
                     onChange={(value) => {
                       props.setFieldValue('clientId', value);
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <ExerciseAutocomplete
-                    value={props.values.exercises ?? []}
-                    onChange={(values) => {
-                      props.setFieldValue('exercises', values);
                     }}
                   />
                 </Grid>

@@ -55,8 +55,10 @@ export const exercise: ExerciseModel = {
   exercises: [],
   filter: defaultFilter,
   searchExercises: computed((state) => {
-    return state.exercises.filter((x) =>
-      x.name?.toLowerCase().includes(state.filter.name.toLowerCase()),
+    return state.exercises.filter(
+      (x) =>
+        x.name?.toLowerCase().includes(state.filter.name.toLowerCase()) &&
+        !x.workoutProgramId,
     );
   }),
 
@@ -103,31 +105,51 @@ export const exercise: ExerciseModel = {
     },
   ),
   update: thunk(
-    async (action, payload, { injections: { exerciseService: service } }) => {
+    async (
+      action,
+      payload,
+      { injections: { exerciseService: service }, getStoreActions },
+    ) => {
       try {
+        const {
+          workout: { fetchAll },
+        } = getStoreActions();
         await service.update(payload);
         action.setUpdateInput(undefined);
         action.fetchAll();
+        fetchAll();
       } catch (error) {
         throw error;
       }
     },
   ),
   delete: thunk(
-    async (action, payload, { injections: { exerciseService: service } }) => {
+    async (
+      action,
+      payload,
+      { injections: { exerciseService: service }, getStoreActions },
+    ) => {
       try {
+        const { workout } = getStoreActions();
         await service.delete(payload);
         action.fetchAll();
+        workout.fetchAll();
       } catch (error) {
         throw error;
       }
     },
   ),
   addToProgram: thunk(
-    async (action, payload, { injections: { exerciseService: service } }) => {
+    async (
+      action,
+      payload,
+      { injections: { exerciseService: service }, getStoreActions },
+    ) => {
       try {
+        const { workout } = getStoreActions();
         await service.addToProgram(payload.id, payload.input);
         action.fetchAll();
+        workout.fetchAll();
       } catch (error) {
         throw error;
       }

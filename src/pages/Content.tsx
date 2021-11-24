@@ -61,7 +61,7 @@ export const Content: React.FC = () => {
       {
         path: '/settings/*',
         element: <SettingsIndex />,
-        policy: ['PersonalTrainer', 'Client', 'Manager'],
+        policy: ['PersonalTrainer', 'Client'],
       },
     ],
     [loggedInUser?.accountType],

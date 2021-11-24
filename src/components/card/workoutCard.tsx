@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 import {
   Avatar,
   Card,
@@ -8,14 +9,16 @@ import {
   Grid,
   IconButton,
   ListItem,
+  ListItemSecondaryAction,
   ListItemText,
   Typography,
 } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { Delete, ExpandMore, RemoveCircle } from '@material-ui/icons';
 import { useCallback, useMemo, useState } from 'react';
 import { WorkoutProgram } from '../../api/__generated__';
 import { useStoreActions, useStoreState } from '../../hooks/useStore';
+import { ExerciseDialog } from '../dialog/exerciseDialog';
 import { ExerciseDrawer } from '../drawer/exerciseDrawer';
 import { WorkoutProgramDrawer } from '../drawer/workoutDrawer';
 
@@ -24,6 +27,9 @@ interface WorkoutCardProps {
 }
 
 const useStyles = makeStyles((theme) => ({
+  li: {
+    '&.MuiListItem-container::marker': {},
+  },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
   },
@@ -34,8 +40,9 @@ const useStyles = makeStyles((theme) => ({
 
 export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutProgram }) => {
   const classes = useStyles();
-  const { clients } = useStoreState((state) => state.user);
+  const { clients, loggedInUser } = useStoreState((state) => state.user);
   const deleteWorkout = useStoreActions((action) => action.workout.delete);
+  const deleteExercise = useStoreActions((action) => action.exercise.delete);
   const [expanded, setExpanded] = useState(false);
 
   const client = useMemo(
@@ -48,6 +55,13 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutProgram }) => {
   const handleDelete = useCallback(() => {
     deleteWorkout(`${workoutProgram.workoutProgramId}`);
   }, [deleteWorkout, workoutProgram.workoutProgramId]);
+
+  const handleExerciseDelete = useCallback(
+    (id: number) => {
+      deleteExercise(`${id}`);
+    },
+    [deleteExercise],
+  );
 
   return (
     <Card elevation={1}>
@@ -62,12 +76,16 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutProgram }) => {
         title={workoutProgram.name}
         subheader={`${client?.lastName}, ${client?.firstName}`}
         action={
-          <>
-            <WorkoutProgramDrawer workoutProgram={workoutProgram} />
-            <IconButton onClick={handleDelete}>
-              <Delete className={classes.deleteIcon} />
-            </IconButton>
-          </>
+          loggedInUser?.accountType === 'PersonalTrainer' ? (
+            <>
+              <WorkoutProgramDrawer workoutProgram={workoutProgram} />
+              <IconButton onClick={handleDelete}>
+                <Delete className={classes.deleteIcon} />
+              </IconButton>
+            </>
+          ) : (
+            <></>
+          )
         }
       />
       <CardContent>
@@ -92,17 +110,18 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutProgram }) => {
                 <Typography variant="h5">Exercises</Typography>
               </Grid>
               <Grid item>
-                {!!workoutProgram.workoutProgramId && (
-                  <ExerciseDrawer
-                    workoutProgramId={workoutProgram.workoutProgramId}
-                  />
-                )}
+                {!!workoutProgram.workoutProgramId &&
+                  loggedInUser?.accountType === 'PersonalTrainer' && (
+                    <ExerciseDrawer
+                      workoutProgramId={workoutProgram.workoutProgramId}
+                    />
+                  )}
               </Grid>
             </Grid>
 
             {workoutProgram.exercises?.map((exercise) => (
               <Grid item key={exercise.exerciseId} xs={12}>
-                <ListItem>
+                <ListItem disableGutters divider className={classes.li}>
                   <ListItemText
                     primary={exercise.name}
                     secondary={`Sets: ${exercise.sets} ${
@@ -110,9 +129,27 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutProgram }) => {
                         ? `Time: ${exercise.time}`
                         : `Repetions: ${exercise.repetitions}`
                     }`}
-                  >
-                    {exercise.description}
-                  </ListItemText>
+                  ></ListItemText>
+
+                  <ListItemSecondaryAction>
+                    <>
+                      <ExerciseDialog exercise={exercise} />
+                      {loggedInUser?.accountType === 'PersonalTrainer' && (
+                        <>
+                          <ExerciseDrawer exercise={exercise} />
+                          <IconButton
+                            onClick={() =>
+                              exercise.exerciseId
+                                ? handleExerciseDelete(exercise.exerciseId)
+                                : {}
+                            }
+                          >
+                            <RemoveCircle className={classes.deleteIcon} />
+                          </IconButton>
+                        </>
+                      )}
+                    </>
+                  </ListItemSecondaryAction>
                 </ListItem>
               </Grid>
             ))}

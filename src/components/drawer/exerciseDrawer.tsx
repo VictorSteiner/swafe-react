@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-no-bind */
 /* eslint-disable max-lines-per-function */
 /* eslint-disable max-lines */
 import {
@@ -21,6 +22,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { NoUndefinedField, TypedOmit } from '../../api/types';
 import { Exercise, ExerciseDto } from '../../api/__generated__';
 import { useStoreActions, useStoreState } from '../../hooks/useStore';
+import { ExerciseAutocomplete } from '../autocomplete/exerciseAutocomplete';
 import { CustomDrawer } from './customDrawer';
 
 type UpdateUserDrawerProps = {
@@ -114,11 +116,19 @@ export const ExerciseDrawer: React.FC<UpdateUserDrawerProps> = ({
                       {exercise
                         ? 'Fill in form and save changes to exercise'
                         : workoutProgramId
-                        ? 'Fill in form and add exercise to program'
+                        ? 'Fill in form or select common exercise and add exercise to program'
                         : 'Fill in form and create exercise'}
                     </Typography>
                   </Grid>
                 </Grid>
+                {workoutProgramId && (
+                  <Grid item xs={12}>
+                    <ExerciseAutocomplete
+                      onChange={(ex) => (ex ? props.setValues(ex) : {})}
+                      value={props.values}
+                    />
+                  </Grid>
+                )}
                 <Grid item xs={12}>
                   <TextField
                     fullWidth

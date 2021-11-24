@@ -25,8 +25,8 @@ export const ManagerFilter: React.FC = () => {
           fullWidth
           variant="outlined"
           value={filter.name}
-          label="Name"
-          placeholder="Search name"
+          placeholder="Search..."
+          label="Search name"
           onChange={handleNameChange}
           InputProps={{ endAdornment: <Search color="disabled" /> }}
         />
