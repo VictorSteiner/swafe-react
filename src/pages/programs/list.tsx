@@ -6,7 +6,7 @@ export const WorkoutProgramList: React.FC = () => {
   const { workoutProgramsQuery } = useStoreState((state) => state.workout);
 
   return (
-    <Grid container spacing={2}>
+    <Grid container spacing={2} wrap="wrap">
       {workoutProgramsQuery.map((workoutProgram) => (
         <Grid item key={workoutProgram.workoutProgramId} xs={12} lg={6}>
           <WorkoutCard workoutProgram={workoutProgram} />

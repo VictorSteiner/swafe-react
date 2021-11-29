@@ -23,7 +23,7 @@ export const userService: IUserService = {
   login: async (input) =>
     await instance.post<Token>(`${endpoint}/login`, input),
   changePassword: async (input) =>
-    await instance.post<Token>(`${endpoint}/Password`, input),
+    await instance.put<Token>(`${endpoint}/Password`, input),
   getClients: async () => await instance.get<User[]>(`${endpoint}/clients`),
   getTrainer: async () => await instance.get<User>(`${endpoint}/trainer`),
   getAll: async () => await instance.get<User[]>(endpoint),

@@ -8,6 +8,7 @@ import {
   Collapse,
   Grid,
   IconButton,
+  List,
   ListItem,
   ListItemSecondaryAction,
   ListItemText,
@@ -28,7 +29,9 @@ interface WorkoutCardProps {
 
 const useStyles = makeStyles((theme) => ({
   li: {
-    '&.MuiListItem-container::marker': {},
+    '& .MuiListItem-container::marker': {
+      marker: null,
+    },
   },
   avatar: {
     backgroundColor: theme.palette.secondary.main,
@@ -119,40 +122,48 @@ export const WorkoutCard: React.FC<WorkoutCardProps> = ({ workoutProgram }) => {
               </Grid>
             </Grid>
 
-            {workoutProgram.exercises?.map((exercise) => (
-              <Grid item key={exercise.exerciseId} xs={12}>
-                <ListItem disableGutters divider className={classes.li}>
-                  <ListItemText
-                    primary={exercise.name}
-                    secondary={`Sets: ${exercise.sets} ${
-                      exercise.repetitions === 0
-                        ? `Time: ${exercise.time}`
-                        : `Repetions: ${exercise.repetitions}`
-                    }`}
-                  ></ListItemText>
+            <Grid item xs={12}>
+              <List>
+                {workoutProgram.exercises?.map((exercise) => (
+                  <ListItem
+                    key={exercise.exerciseId}
+                    disableGutters
+                    dense
+                    divider
+                    className={classes.li}
+                  >
+                    <ListItemText
+                      primary={exercise.name}
+                      secondary={`Sets: ${exercise.sets} ${
+                        exercise.repetitions === 0
+                          ? `Time: ${exercise.time}`
+                          : `Repetions: ${exercise.repetitions}`
+                      }`}
+                    ></ListItemText>
 
-                  <ListItemSecondaryAction>
-                    <>
-                      <ExerciseDialog exercise={exercise} />
-                      {loggedInUser?.accountType === 'PersonalTrainer' && (
-                        <>
-                          <ExerciseDrawer exercise={exercise} />
-                          <IconButton
-                            onClick={() =>
-                              exercise.exerciseId
-                                ? handleExerciseDelete(exercise.exerciseId)
-                                : {}
-                            }
-                          >
-                            <RemoveCircle className={classes.deleteIcon} />
-                          </IconButton>
-                        </>
-                      )}
-                    </>
-                  </ListItemSecondaryAction>
-                </ListItem>
-              </Grid>
-            ))}
+                    <ListItemSecondaryAction>
+                      <>
+                        <ExerciseDialog exercise={exercise} />
+                        {loggedInUser?.accountType === 'PersonalTrainer' && (
+                          <>
+                            <ExerciseDrawer exercise={exercise} />
+                            <IconButton
+                              onClick={() =>
+                                exercise.exerciseId
+                                  ? handleExerciseDelete(exercise.exerciseId)
+                                  : {}
+                              }
+                            >
+                              <RemoveCircle className={classes.deleteIcon} />
+                            </IconButton>
+                          </>
+                        )}
+                      </>
+                    </ListItemSecondaryAction>
+                  </ListItem>
+                ))}
+              </List>
+            </Grid>
           </Grid>
         </CardContent>
       </Collapse>

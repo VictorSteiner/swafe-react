@@ -69,23 +69,7 @@ export const ChangePasswordForm: React.FC = () => {
                   value={props.values.email}
                   type="email"
                   placeholder="Email"
-                  onKeyPress={(event) => {
-                    if (event.key === 'Enter') {
-                      props.submitForm();
-                    }
-                  }}
-                  onChange={props.handleChange}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  variant="outlined"
-                  name="password"
-                  color="primary"
-                  value={props.values.password}
-                  type="password"
-                  placeholder="Password"
+                  label="Email"
                   onKeyPress={(event) => {
                     if (event.key === 'Enter') {
                       props.submitForm();
@@ -102,7 +86,8 @@ export const ChangePasswordForm: React.FC = () => {
                   color="primary"
                   value={props.values.oldPassword}
                   type="password"
-                  placeholder="Password"
+                  label="Old password"
+                  placeholder="Old password"
                   onKeyPress={(event) => {
                     if (event.key === 'Enter') {
                       props.submitForm();
@@ -111,7 +96,24 @@ export const ChangePasswordForm: React.FC = () => {
                   onChange={props.handleChange}
                 />
               </Grid>
-
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  variant="outlined"
+                  name="password"
+                  color="primary"
+                  label="New password"
+                  value={props.values.password}
+                  type="password"
+                  placeholder="New password"
+                  onKeyPress={(event) => {
+                    if (event.key === 'Enter') {
+                      props.submitForm();
+                    }
+                  }}
+                  onChange={props.handleChange}
+                />
+              </Grid>
               <Grid item xs={4}>
                 <Button
                   onClick={props.submitForm}
